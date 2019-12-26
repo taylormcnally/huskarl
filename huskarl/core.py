@@ -25,3 +25,7 @@ class Agent:
 	def train(self, step):
 		"""Trains the agent for one step."""
 		raise NotImplementedError()
+
+	def load(self, filename):
+		"""Load a saved agent from a file."""
+		raise NotImplementedError()

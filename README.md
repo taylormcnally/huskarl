@@ -24,6 +24,7 @@ Several algorithms are implemented and more are planned.
 * [x] Advantage Actor-Critic (A2C)
 * [x] Deep Deterministic Policy Gradient (DDPG)
 * [x] Prioritized Experience Replay
+* [ ] Soft Actor Critic (SAC)
 * [ ] Proximal Policy Optimization (PPO)
 * [ ] Curiosity-Driven Exploration
 

@@ -171,3 +171,48 @@ class PrioritizedExperienceReplay:
 	def __len__(self):
 		"""Returns the number of traces stored."""
 		return len(self.traces)
+
+
+class EpisodicExperienceReplay:
+	"""Stores interaction with an environment as a double-ended queue of Transition instances.
+	
+	Provides efficient sampling of multistep traces.
+	If exclude_boundaries==True, then traces are sampled such that they don't include episode boundaries.
+	"""
+	def __init__(self, capacity, steps=1, exclude_boundaries=False):
+		"""
+		Args:
+			capacity (int): The maximum number of traces the memory should be able to store.
+			steps (int): The number of steps (transitions) each sampled trace should include.
+			exclude_boundaries (bool): If True, sampled traces will not include episode boundaries.
+		"""
+		self.traces = deque(maxlen=capacity)
+		self.buffer = [] # Rolling buffer of size at most self.steps
+		self.capacity = capacity
+		self.steps = steps
+		self.exclude_boundaries = exclude_boundaries
+
+	def put(self, transition):
+		"""Adds transition to memory."""
+		# Append transition to temporary rolling buffer
+		self.buffer.append(transition)
+		# If buffer doesn't yet contain a full trace - return
+		if len(self.buffer) < self.steps: return
+		# If self.traces not at max capacity, append new trace and priority (use highest existing priority if available)
+		self.traces.append(tuple(self.buffer))
+		# If excluding boundaries and we've reached a boundary - clear the buffer
+		if self.exclude_boundaries and transition.next_state is None:
+			self.buffer = []
+			return
+		# Roll buffer
+		self.buffer = self.buffer[1:]
+
+	def get(self, batch_size):
+		"""Samples the specified number of traces uniformly from the buffer."""
+		# Sample batch_size traces
+		traces = random.sample(self.traces, batch_size)
+		return unpack(traces)
+
+	def __len__(self):
+		"""Returns the number of traces stored."""
+		return len(self.traces)
